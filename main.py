@@ -1,3 +1,6 @@
+'''
+Main Fast API application
+'''
 from typing import Union
 
 from fastapi import FastAPI
