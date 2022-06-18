@@ -20,8 +20,8 @@ def read_root():
 
 @logger.catch
 @app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
+def read_item(item_id: int, query: Union[str, None] = None):
     '''
     Get some item
     '''
-    return {"item_id": item_id, "q": q}
+    return {"item_id": item_id, "q": query}
