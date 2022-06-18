@@ -4,6 +4,7 @@ Main Fast API application
 from fastapi import FastAPI
 
 from loguru import logger
+from api.item_model import Item
 
 logger.add("file.log", rotation="5 MB")
 
@@ -19,6 +20,16 @@ def read_root():
     Home page
     '''
     return {"Hello": "World"}
+
+
+@logger.catch
+@app.post("/items/")
+def calc_full_price(item: Item):
+    '''
+    Calculate price with tax
+    '''
+    full_price = item.price + item.tax
+    return full_price
 
 
 @logger.catch
