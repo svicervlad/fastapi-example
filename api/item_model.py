@@ -13,3 +13,4 @@ class Item(BaseModel):
     description: str | None
     price: float
     tax: float
+    full_price: float | None

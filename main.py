@@ -23,13 +23,13 @@ def read_root():
 
 
 @logger.catch
-@app.post("/items/")
-def calc_full_price(item: Item):
+@app.post("/items/", response_model=Item)
+def calc_full_price(item: Item) -> Item:
     '''
     Calculate price with tax
     '''
-    full_price = item.price + item.tax
-    return full_price
+    item.full_price = item.price + item.tax
+    return item
 
 
 @logger.catch
