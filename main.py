@@ -11,6 +11,7 @@ logger.debug("Application stareted")
 
 app = FastAPI()
 
+
 @logger.catch
 @app.get("/")
 def read_root():
@@ -19,9 +20,10 @@ def read_root():
     '''
     return {"Hello": "World"}
 
+
 @logger.catch
 @app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None): # pylint: disable=invalid-name
+def read_item(item_id: int, q: str | None = None):  # pylint: disable=invalid-name
     '''
     Get some item
     '''
