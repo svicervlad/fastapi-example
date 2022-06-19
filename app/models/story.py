@@ -5,6 +5,8 @@ from datetime import datetime
 from enum import Enum
 import pandas as pd
 from pydantic import BaseModel
+from bson.objectid import ObjectId
+from bson.errors import InvalidId
 from app.db.mongo import client
 
 DB_NAME = 'story'
@@ -44,12 +46,18 @@ class Story(BaseModel):
         Update story by id
         '''
         self.updated = datetime.utcnow()
-        self.__collection().update_one(
-            {"_id": self.id},
+        try:
+            id_to_update = ObjectId(self.id)
+        except (InvalidId, TypeError):
+            return False
+        result = self.__collection().update_one(
+            {"_id": id_to_update},
             {
                 "$set": self.dict(exclude={"id"})
             }
         )
+        if result.modified_count < 1:
+            return False
         return self
 
 
