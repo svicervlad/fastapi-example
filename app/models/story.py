@@ -5,7 +5,8 @@ from datetime import datetime
 from enum import Enum
 from fastapi import HTTPException, status
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+from pymongo.collection import ReturnDocument
 from app.db.mongo import db
 from app.utils.mongo import get_object_id
 
@@ -30,6 +31,15 @@ class StoryBase(BaseModel):
     type: StoryType
 
 
+class StoryUpdate(BaseModel):
+    '''
+    Update story object
+    '''
+    title: str | None
+    body: str | None
+    type: StoryType | None
+
+
 class StoryDB(StoryBase):
     '''
     Model for story in db
@@ -37,6 +47,12 @@ class StoryDB(StoryBase):
     id: str
     updated: datetime
     created: datetime
+
+    @validator('id')
+    def id_should_be_object_id(cls, v):
+        if not get_object_id(v):
+            raise ValueError('id should be string of BSON Object ID')
+        return v
 
 
 def story_create(story: StoryBase) -> StoryDB:
@@ -55,11 +71,11 @@ def story_create(story: StoryBase) -> StoryDB:
     return story
 
 
-def story_update(story: StoryBase, story_id: str) -> StoryDB:
+def story_update(story: StoryUpdate, story_id: str) -> StoryDB:
     '''
     Update story by id
     '''
-    story = story.dict()
+    story = story.dict(exclude_none=True)
     story['updated'] = datetime.utcnow()
     id_to_update = get_object_id(story_id)
     if not id_to_update:
@@ -69,7 +85,8 @@ def story_update(story: StoryBase, story_id: str) -> StoryDB:
         {"_id": id_to_update},
         {
             "$set": story
-        }
+        },
+        return_document=ReturnDocument.AFTER
     )
     if not story_raw:
         raise HTTPException(
@@ -85,7 +102,7 @@ def get_stories_from_db(stories_type: StoryType) -> list[StoryDB]:
     '''
     Get all stories from db by type
     '''
-    objects = collection.find({'type': stories_type})
+    objects = list(collection.find({'type': stories_type}))
     if len(objects) == 0:
         return []
     df = pd.DataFrame(objects)

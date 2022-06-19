@@ -3,7 +3,7 @@ Stories routers
 '''
 from fastapi import APIRouter, status
 from app.models.story import (
-        StoryBase,StoryDB, StoryType,
+    StoryBase, StoryUpdate, StoryDB, StoryType,
         get_stories_from_db, get_story_by_id, story_create, story_update
     )
 
@@ -36,5 +36,5 @@ def create_story(story: StoryBase):
 
 
 @router.patch("/story/{story_id}", response_model=StoryDB, status_code=status.HTTP_200_OK)
-def update_story(story: StoryBase, story_id: str):
+def update_story(story: StoryUpdate, story_id: str):
     return story_update(story, story_id)
