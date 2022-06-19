@@ -86,9 +86,9 @@ def get_stories_from_db(stories_type: StoryType) -> list[StoryDB]:
     Get all stories from db by type
     '''
     objects = collection.find({'type': stories_type})
-    df = pd.DataFrame(objects)
-    if len(df) == 0:
+    if len(objects) == 0:
         return []
+    df = pd.DataFrame(objects)
     df['id'] = pd.Series(df['_id']).apply(lambda x: str(x))
     del df["_id"]
     stories = [StoryDB(**x) for x in df.to_dict('records')]
