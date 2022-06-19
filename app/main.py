@@ -4,13 +4,27 @@ Main Fast API application
 from fastapi import FastAPI
 
 from loguru import logger
-from api.item_model import Item
-
-logger.add("file.log", rotation="5 MB")
-
-logger.debug("Application stareted")
+from .utils.logger import configure_logger
+from .models.item_model import Item
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+async def startup_event():
+    '''
+    Hook run after startup app
+    '''
+    configure_logger()
+    logger.debug("app is stareted")
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    '''
+    Hook run after app stoped
+    '''
+    logger.debug("app is stoped")
 
 
 @logger.catch
