@@ -3,6 +3,7 @@ Define Story Object and cruds
 '''
 from datetime import datetime
 from enum import Enum
+from fastapi import HTTPException, status
 import pandas as pd
 from pydantic import BaseModel
 from app.db.mongo import db
@@ -37,6 +38,9 @@ class Story(BaseModel):
         self.updated = datetime.utcnow()
         story = self.dict(exclude={"id"})
         story_id = collection.insert_one(story).inserted_id
+        if not story_id:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Story can't created")
         self.id = str(story_id)
         return self
 
@@ -47,7 +51,8 @@ class Story(BaseModel):
         self.updated = datetime.utcnow()
         id_to_update = get_object_id(self.id)
         if not id_to_update:
-            return None
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Id is not valid")
         result = collection.update_one(
             {"_id": id_to_update},
             {
@@ -55,7 +60,8 @@ class Story(BaseModel):
             }
         )
         if result.modified_count < 1:
-            return None
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Story not found")
         return self
 
 
@@ -65,6 +71,7 @@ class ExistedStory(Story):
     '''
     id: str
     updated: datetime
+
 
 def get_stories_from_db(stories_type: StoryType) -> list[Story]:
     '''
@@ -80,16 +87,18 @@ def get_stories_from_db(stories_type: StoryType) -> list[Story]:
     return stories
 
 
-def get_story_by_id(story_id: str) -> ExistedStory | None:
+def get_story_by_id(story_id: str) -> ExistedStory:
     '''
     Get story by id
     '''
     story_id_object = get_object_id(story_id)
     if not story_id_object:
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Id is not valid")
     story_raw = collection.find_one({'_id': story_id_object})
     if not story_raw:
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Story not found")
     story_raw['id'] = story_id
     del story_raw['_id']
     story = ExistedStory(**story_raw)
