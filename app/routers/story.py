@@ -2,7 +2,7 @@
 Stories routers
 '''
 from fastapi import APIRouter, HTTPException
-from app.models.story import Story, StoryType, get_stories_from_db
+from app.models.story import Story, ExistedStory, StoryType, get_stories_from_db
 
 
 router = APIRouter(
@@ -23,8 +23,8 @@ def create_story(story: Story):
     return story
 
 
-@router.patch("/", response_model=Story)
-def update_story(story: Story):
+@router.patch("/", response_model=ExistedStory)
+def update_story(story: ExistedStory):
     '''
     ## Create new story
 

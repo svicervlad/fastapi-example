@@ -60,6 +60,8 @@ class Story(BaseModel):
             return False
         return self
 
+class ExistedStory(Story):
+    id: str
 
 def get_stories_from_db(stories_type: StoryType) -> list[Story]:
     '''
