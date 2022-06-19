@@ -18,5 +18,8 @@ def create_story(story: Story):
 
 @router.get('/{stories_type}', response_model=list[Story])
 def get_stories(stories_type: str):
+    '''
+    Get stories by stories type
+    '''
     result = get_stories_from_db(stories_type)
     return result
