@@ -30,8 +30,6 @@ def get_story(story_id: str):
 @router.put("/", response_model=Story, status_code=status.HTTP_201_CREATED)
 def create_story(story: Story):
     '''
-    ## Create new story
-
     "id" and "updated" params no need to request - auto generating
 
     '''
@@ -42,8 +40,6 @@ def create_story(story: Story):
 @router.patch("/", response_model=ExistedStory, status_code=status.HTTP_200_OK)
 def update_story(story: ExistedStory):
     '''
-    ## Create new story
-
     "updated" param no need to request - auto generating
 
     '''

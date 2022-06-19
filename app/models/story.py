@@ -30,12 +30,14 @@ class Story(BaseModel):
     body: str
     type: StoryType
     updated: datetime | None
+    created: datetime | None
 
     def create(self):
         '''
         Create story
         '''
         self.updated = datetime.utcnow()
+        self.created = datetime.utcnow()
         story = self.dict(exclude={"id"})
         story_id = collection.insert_one(story).inserted_id
         if not story_id:
@@ -71,6 +73,7 @@ class ExistedStory(Story):
     '''
     id: str
     updated: datetime
+    created: datetime
 
 
 def get_stories_from_db(stories_type: StoryType) -> list[Story]:
