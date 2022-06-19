@@ -2,13 +2,33 @@
 Stories routers
 '''
 from fastapi import APIRouter, HTTPException
-from app.models.story import Story, ExistedStory, StoryType, get_stories_from_db
+from app.models.story import Story, ExistedStory, StoryType, get_stories_from_db, get_story_by_id
 
 
 router = APIRouter(
     prefix="/stories",
     tags=["stories"],
 )
+
+
+@router.get('/{stories_type}', response_model=list[Story])
+def get_stories(stories_type: StoryType):
+    '''
+    Get stories by stories type
+    '''
+    result = get_stories_from_db(stories_type)
+    return result
+
+
+@router.get('/story/{story_id}', response_model=ExistedStory)
+def get_story(story_id: str):
+    '''
+    Get story by id
+    '''
+    story = get_story_by_id(story_id)
+    if not story:
+        raise HTTPException(status_code=404, detail="Story not found")
+    return story
 
 
 @router.post("/", response_model=Story)
@@ -35,12 +55,3 @@ def update_story(story: ExistedStory):
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
     return story
-
-
-@router.get('/{stories_type}', response_model=list[Story])
-def get_stories(stories_type: StoryType):
-    '''
-    Get stories by stories type
-    '''
-    result = get_stories_from_db(stories_type)
-    return result
