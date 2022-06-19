@@ -1,3 +1,6 @@
+'''
+Stories routers
+'''
 from fastapi import APIRouter
 from app.models.story import Story, StoryType, get_stories_from_db
 
@@ -11,9 +14,12 @@ router = APIRouter(
 @router.post("/", response_model=Story)
 def create_story(story: Story):
     '''
-    Create new story
+    ## Create new story
+
+    "id" and "updated" params no need to request - auto generating
+
     '''
-    story = story.create()
+    story.create()
     return story
 
 @router.get('/{stories_type}', response_model=list[Story])
