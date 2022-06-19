@@ -11,12 +11,14 @@ from app.db.mongo import client
 
 DB_NAME = 'story'
 
+
 class StoryType(str, Enum):
     '''
     Allow story types
     '''
     NEWS = 'news'
     DRAFT = 'draft'
+
 
 class Story(BaseModel):
     '''
@@ -60,8 +62,10 @@ class Story(BaseModel):
             return False
         return self
 
+
 class ExistedStory(Story):
     id: str
+
 
 def get_stories_from_db(stories_type: StoryType) -> list[Story]:
     '''

@@ -36,6 +36,7 @@ def update_story(story: ExistedStory):
         raise HTTPException(status_code=404, detail="Story not found")
     return story
 
+
 @router.get('/{stories_type}', response_model=list[Story])
 def get_stories(stories_type: StoryType):
     '''
