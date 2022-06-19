@@ -1,8 +1,8 @@
 '''
 Stories routers
 '''
-from fastapi import APIRouter, HTTPException
-from app.models.story import Story, ExistedStory, StoryType, get_stories_from_db
+from fastapi import APIRouter, status
+from app.models.story import StoryBase, StoryDB, StoryType, get_stories_from_db, get_story_by_id, story_create, story_update
 
 
 router = APIRouter(
@@ -11,36 +11,29 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=Story)
-def create_story(story: Story):
-    '''
-    ## Create new story
-
-    "id" and "updated" params no need to request - auto generating
-
-    '''
-    story.create()
-    return story
-
-
-@router.patch("/", response_model=ExistedStory)
-def update_story(story: ExistedStory):
-    '''
-    ## Create new story
-
-    "updated" param no need to request - auto generating
-
-    '''
-    story = story.update()
-    if not story:
-        raise HTTPException(status_code=404, detail="Story not found")
-    return story
-
-
-@router.get('/{stories_type}', response_model=list[Story])
+@router.get('/{stories_type}', response_model=list[StoryDB])
 def get_stories(stories_type: StoryType):
     '''
-    Get stories by stories type
+    Get stories by story type
     '''
-    result = get_stories_from_db(stories_type)
-    return result
+    return get_stories_from_db(stories_type)
+
+
+@router.get('/story/{story_id}', response_model=StoryDB)
+def get_story(story_id: str):
+    '''
+    Get story by id
+    '''
+    return get_story_by_id(story_id)
+
+
+@router.put("/story/", response_model=StoryDB, status_code=status.HTTP_201_CREATED)
+def create_story(story: StoryBase):
+    story = story_create(story)
+    return story
+
+
+@router.patch("/story/{story_id}", response_model=StoryDB, status_code=status.HTTP_200_OK)
+def update_story(story: StoryBase, story_id: str):
+    story = story_update(story, story_id)
+    return story

@@ -7,7 +7,7 @@ from pymongo.mongo_client import MongoClient
 CONNECTION_STRING = "mongodb://mongo:mongo@mongo"
 
 client = MongoClient('mongodb://mongo', username='mongo', password='mongo')
-
+db = client['app']
 
 if __name__ == "__main__":
     db = client.test
