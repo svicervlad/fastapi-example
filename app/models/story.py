@@ -53,11 +53,11 @@ class Story(BaseModel):
         return self
 
 
-def get_stories_from_db(type: StoryType) -> list[Story]:
+def get_stories_from_db(stories_type: StoryType) -> list[Story]:
     '''
     Get all stories from db by type
     '''
-    collection = client[DB_NAME][type]
+    collection = client[DB_NAME][stories_type]
     objects = collection.find()
     df = pd.DataFrame(objects)
     if len(df) == 0:
