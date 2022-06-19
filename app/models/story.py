@@ -50,6 +50,8 @@ def get_stories_from_db(type: str) -> list[Story]:
     collection = client[DB_NAME][type]
     objects = collection.find()
     df = pd.DataFrame(objects)
+    if len(df) == 0:
+        return []
     df['id'] = pd.Series(df['_id']).apply(lambda x: str(x))
     del df["_id"]
     stories = [Story(**x) for x in df.to_dict('records')]
