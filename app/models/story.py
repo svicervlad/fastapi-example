@@ -65,19 +65,19 @@ def story_update(story: StoryBase, story_id: str) -> StoryDB:
     if not id_to_update:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Id is not valid")
-    story = collection.find_one_and_update(
+    story_raw = collection.find_one_and_update(
         {"_id": id_to_update},
         {
             "$set": story
         }
     )
-    if not story:
+    if not story_raw:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Story not found")
-    story['id'] = story_id
-    del story['_id']
-    story = StoryDB(**story)
-    return story
+    story_raw['id'] = story_id
+    del story_raw['_id']
+    story_raw = StoryDB(**story_raw)
+    return story_raw
 
 
 
