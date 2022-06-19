@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.models.story import Story, get_stories_from_db
+from app.models.story import Story, StoryType, get_stories_from_db
 
 
 router = APIRouter(
@@ -17,7 +17,7 @@ def create_story(story: Story):
     return story
 
 @router.get('/{stories_type}', response_model=list[Story])
-def get_stories(stories_type: str):
+def get_stories(stories_type: StoryType):
     '''
     Get stories by stories type
     '''

@@ -2,12 +2,19 @@
 Define Story Object and cruds
 '''
 from datetime import datetime
+from enum import Enum
 import pandas as pd
 from pydantic import BaseModel
 from app.db.mongo import client
 
 DB_NAME = 'story'
 
+class StoryType(str, Enum):
+    '''
+    Allow story types
+    '''
+    NEWS = 'news'
+    DRAFT = 'draft'
 
 class Story(BaseModel):
     '''
@@ -16,7 +23,7 @@ class Story(BaseModel):
     id: str | None = None
     title: str
     body: str
-    type: str
+    type: StoryType
     updated: datetime | None
 
     def __collection(self):
@@ -46,7 +53,10 @@ class Story(BaseModel):
         return self
 
 
-def get_stories_from_db(type: str) -> list[Story]:
+def get_stories_from_db(type: StoryType) -> list[Story]:
+    '''
+    Get all stories from db by type
+    '''
     collection = client[DB_NAME][type]
     objects = collection.find()
     df = pd.DataFrame(objects)
