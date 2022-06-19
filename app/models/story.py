@@ -5,7 +5,8 @@ from datetime import datetime
 from enum import Enum
 from fastapi import HTTPException, status
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+from pymongo.collection import ReturnDocument
 from app.db.mongo import db
 from app.utils.mongo import get_object_id
 
@@ -30,6 +31,15 @@ class StoryBase(BaseModel):
     type: StoryType
 
 
+class StoryUpdate(BaseModel):
+    '''
+    Update story object
+    '''
+    title: str | None
+    body: str | None
+    type: StoryType | None
+
+
 class StoryDB(StoryBase):
     '''
     Model for story in db
@@ -37,6 +47,12 @@ class StoryDB(StoryBase):
     id: str
     updated: datetime
     created: datetime
+
+    @validator('id')
+    def id_should_be_object_id(cls, v):
+        if not get_object_id(v):
+            raise ValueError('id should be string of BSON Object ID')
+        return v
 
 
 def story_create(story: StoryBase) -> StoryDB:
@@ -55,29 +71,30 @@ def story_create(story: StoryBase) -> StoryDB:
     return story
 
 
-def story_update(story: StoryBase, story_id: str) -> StoryDB:
+def story_update(story: StoryUpdate, story_id: str) -> StoryDB:
     '''
     Update story by id
     '''
-    story = story.dict()
+    story = story.dict(exclude_none=True)
     story['updated'] = datetime.utcnow()
     id_to_update = get_object_id(story_id)
     if not id_to_update:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Id is not valid")
-    story = collection.find_one_and_update(
+    story_raw = collection.find_one_and_update(
         {"_id": id_to_update},
         {
             "$set": story
-        }
+        },
+        return_document=ReturnDocument.AFTER
     )
-    if not story:
+    if not story_raw:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Story not found")
-    story['id'] = story_id
-    del story['_id']
-    story = StoryDB(**story)
-    return story
+    story_raw['id'] = story_id
+    del story_raw['_id']
+    story_raw = StoryDB(**story_raw)
+    return story_raw
 
 
 
@@ -85,10 +102,10 @@ def get_stories_from_db(stories_type: StoryType) -> list[StoryDB]:
     '''
     Get all stories from db by type
     '''
-    objects = collection.find({'type': stories_type})
-    df = pd.DataFrame(objects)
-    if len(df) == 0:
+    objects = list(collection.find({'type': stories_type}))
+    if len(objects) == 0:
         return []
+    df = pd.DataFrame(objects)
     df['id'] = pd.Series(df['_id']).apply(lambda x: str(x))
     del df["_id"]
     stories = [StoryDB(**x) for x in df.to_dict('records')]
