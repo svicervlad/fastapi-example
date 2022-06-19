@@ -1,8 +1,8 @@
 '''
 Define Story Object and cruds
 '''
-
 from datetime import datetime
+import pandas as pd
 from pydantic import BaseModel
 from app.db.mongo import client
 
@@ -44,3 +44,13 @@ class Story(BaseModel):
             }
         )
         return self
+
+
+def get_stories_from_db(type: str) -> list[Story]:
+    collection = client[DB_NAME][type]
+    objects = collection.find()
+    df = pd.DataFrame(objects)
+    df['id'] = pd.Series(df['_id']).apply(lambda x: str(x))
+    del df["_id"]
+    stories = [Story(**x) for x in df.to_dict('records')]
+    return stories
