@@ -31,7 +31,7 @@ class StoryBase(BaseModel):
     type: StoryType
 
 
-class StoryUpdate(BaseModel):
+class StoryUpdate(StoryBase):
     '''
     Update story object
     '''
